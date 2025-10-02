@@ -1,0 +1,17 @@
+
+{
+  "nroAfiliado": "654321",
+  "nombre": "Juan",
+  "apellido": "Pérez",
+  "dni": "12345678",
+  "fechaNacimiento": "1990-05-15",
+  "fechaConsulta": "2025-09-15",
+  "sexo": "M",
+  "email": "juan.perez@mail.com",
+  "telefono": "3519876543",
+  "obraSocial": "SwissMedical",
+  "tipoAutorizacion": "Procedimiento",
+  "observaciones": "Paciente con turno programado",
+  "terminos": true,
+  "prioridad": "media"
+}

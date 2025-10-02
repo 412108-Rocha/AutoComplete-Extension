@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Mapper</title>
+    <style>
+        /* Layout base */
+        body { font-family: Arial, sans-serif; padding: 10px; width: 380px; }
+        h3 { margin: 8px 0; }
+        section { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; background: #fff; }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 6px; border-bottom: 1px solid #eee; margin-bottom: 8px; flex-wrap: wrap; }
+        .tab { flex: 1; text-align: center; padding: 8px; cursor: pointer; background: #f7f7f7; border: 1px solid #ddd; border-bottom: none; border-top-left-radius: 6px; border-top-right-radius: 6px; font-weight: 600; color: #444; }
+        .tab.active { background: #fff; color: #000; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Utilidades */
+        .row { display: flex; gap: 8px; align-items: center; margin: 6px 0; }
+        .row > * { flex: 1; }
+        .split { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .grow { flex: 1; }
+        .divider { height: 1px; background: #eee; margin: 8px 0; }
+        small.muted { color: #6a6a6a; }
+
+        /* Formularios */
+        .form { display: flex; flex-direction: column; gap: 10px; }
+        .field { display: flex; flex-direction: column; gap: 4px; }
+        .field label { font-size: 12px; font-weight: 600; color: #444; }
+        input[type="text"], input[type="number"], select { padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; outline: none; }
+        input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: #6aa3ff; box-shadow: 0 0 0 2px rgba(106,163,255,.15); }
+        .actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+        /* Listas */
+        ul { list-style: none; padding-left: 8px; margin: 6px 0; }
+        li { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; }
+        .cat { font-weight: bold; margin-top: 8px; color: #222; }
+
+        /* Botones */
+        button { padding: 6px 10px; cursor: pointer; border-radius: 6px; border: 1px solid #ccc; background: #f5f5f5; }
+        button:hover { background: #eee; }
+        .btn-primary { background: #2563eb; color: #fff; border-color: #1e4fc8; }
+        .btn-primary:hover { background: #1e4fc8; }
+        .btn-danger { background: #c62828; color: #fff; border-color: #a31e1e; }
+
+        /* Pills/estados */
+        .pill { font-size: 12px; color: #fff; padding: 2px 8px; border-radius: 14px; }
+        .pill.ok { background: #2e7d32; }
+        .pill.warn { background: #f9a825; color: #000; }
+        .pill.err { background: #c62828; }
+        .kbd { background: #eee; border: 1px solid #ccc; border-radius: 4px; padding: 0 4px; }
+    </style>
+</head>
+<body>
+<h3>Mapper</h3>
+
+<div class="tabs" role="tablist">
+    <button class="tab" data-target="inicio" role="tab">Inicio</button>
+    <button class="tab" data-target="campos" role="tab">Campos</button>
+    <button class="tab" data-target="mapeo" role="tab">Mapeo</button>
+    <button class="tab" data-target="config" role="tab">Config</button>
+    <button class="tab" data-target="ayuda" role="tab">Ayuda</button>
+</div>
+
+<section id="inicio" class="tab-content" data-tab="inicio">
+    <div class="row"><strong>Acciones rápidas</strong></div>
+    <div class="split">
+        <button id="btnCopiar" class="btn-primary">Copiar</button>
+        <button id="btnPegar" class="btn-primary">Pegar</button>
+    </div>
+    <div class="divider"></div>
+    <div class="row"><strong>Portapapeles</strong></div>
+    <div class="row"><span id="estadoClip" class="pill">—</span><span id="tiempoClip"></span></div>
+    <ul id="listaClip"></ul>
+    <div class="actions"><button id="vaciarClip" class="btn-danger">Vaciar portapapeles</button></div>
+</section>
+
+<section id="campos" class="tab-content" data-tab="campos">
+    <div class="row"><strong>Campos mapeables</strong></div>
+    <!-- Formulario en filas -->
+    <div class="form" id="formCampo">
+        <div class="field">
+            <label for="campoCategoria">Tipo de campo</label>
+            <select id="campoCategoria">
+                <option value="texto">Texto</option>
+                <option value="numeros">Números</option>
+                <option value="fechas">Fechas</option>
+                <option value="booleanos">Booleanos</option>
+                <option value="select">Select</option>
+                <option value="textoLargo">Texto largo</option>
+            </select>
+        </div>
+        <div class="field">
+            <label for="campoNombre">Nombre</label>
+            <input id="campoNombre" type="text" placeholder="ej: nombre" />
+        </div>
+        <div class="field">
+            <label for="campoCodigo">Código único</label>
+            <input id="campoCodigo" type="text" placeholder="ej: nom" />
+            <small id="hintCodigo" class="muted">Texto libre. Para Números: solo dígitos. Para Fechas: YYYY-MM-DD. Booleanos: true/false/1/0/si/no.</small>
+        </div>
+        <div class="actions">
+            <button id="agregarCampo" class="btn-primary">Agregar</button>
+        </div>
+    </div>
+    <small class="muted">Los campos existentes están bloqueados; para cambiarlos, usá Editar y luego Guardar/Cancelar.</small>
+    <div id="listaCampos"></div>
+</section>
+
+<section id="mapeo" class="tab-content" data-tab="mapeo">
+    <div class="row"><strong>Mapeo por dominio</strong></div>
+    <div class="split">
+        <button id="mapearCopiar" class="btn-primary">Mapear para copiar</button>
+        <button id="mapearPegar" class="btn-primary">Mapear para pegar</button>
+    </div>
+    <div class="actions"><button id="borrarMapeoDominio" class="btn-danger">Borrar mapeo del dominio</button></div>
+</section>
+
+<section id="config" class="tab-content" data-tab="config">
+    <div class="row"><strong>Configuración</strong></div>
+    <div class="row">
+        <label>Expiración (TTL) en segundos: <input type="number" id="ttlInput" min="10" step="10" /></label>
+        <label><input type="checkbox" id="notifsChk" /> Notificaciones</label>
+    </div>
+    <div class="divider"></div>
+    <div class="row"><strong>Atajos</strong></div>
+    <div class="row">
+        <label class="grow"><input type="checkbox" id="cmdsChk" /> Atajos activos</label>
+        <div>
+            <div><small class="muted">Copiar: Ctrl+Shift+C</small></div>
+            <div><small class="muted">Pegar: Ctrl+Shift+V</small></div>
+        </div>
+    </div>
+    <div class="actions"><button id="abrirAtajos">Abrir página de atajos…</button></div>
+    <div class="divider"></div>
+    <div class="row"><strong>Backup</strong></div>
+    <div class="split">
+        <button id="exportar">Exportar JSON</button>
+        <button id="importar">Importar JSON</button>
+        <input type="file" id="importFile" accept="application/json" style="display:none;" />
+    </div>
+    <div class="actions"><button id="guardarConfig" class="btn-primary">Guardar configuración</button></div>
+</section>
+
+<section id="ayuda" class="tab-content" data-tab="ayuda">
+    <div class="row"><strong>Tutoriales</strong></div>
+    <ol>
+        <li><strong>Conceptos clave</strong>
+            <ul>
+                <li>Campo: dato que querés copiar/pegar (ej.: nombre, DNI).</li>
+                <li>Código: valor único que usás para reconocer un input al mapear.</li>
+                <li>TTL: tiempo que los datos copiados permanecen disponibles.</li>
+            </ul>
+        </li>
+        <li><strong>Definir campos</strong> (pestaña Campos)
+            <ul>
+                <li>Elegí el tipo, poné nombre y código único → Agregar.</li>
+                <li>Para cambiar un código: Editar → Guardar/Cancelar.</li>
+            </ul>
+        </li>
+        <li><strong>Mapear</strong> (pestaña Mapeo)
+            <ul>
+                <li>En ORIGEN: completá inputs con tus códigos → “Mapear para copiar”.</li>
+                <li>En DESTINO: ubicá los inputs destino con esos mismos códigos → “Mapear para pegar”.</li>
+            </ul>
+        </li>
+        <li><strong>Usar</strong> (pestaña Inicio)
+            <ul>
+                <li>Copiar en ORIGEN y Pegar en DESTINO; revisá portapapeles y vencimiento.</li>
+                <li>Atajos: Ctrl+Shift+C / Ctrl+Shift+V (si están activos en Config).</li>
+            </ul>
+        </li>
+        <li><strong>Config y backup</strong> (pestaña Config)
+            <ul>
+                <li>Ajustá TTL y notificaciones.</li>
+                <li>Activá atajos y cambiá combinaciones desde la página de atajos.</li>
+                <li>Exportá/Importá tu configuración en JSON.</li>
+            </ul>
+        </li>
+    </ol>
+</section>
+
+<script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Mapper Formulario",
+  "version": "1.3",
+  "permissions": ["storage", "activeTab", "scripting", "notifications", "downloads"],
+  "action": { "default_popup": "popup.html" },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "copiar": {
+      "suggested_key": { "default": "Ctrl+Shift+C" },
+      "description": "Copiar datos del formulario (dominio origen)"
+    },
+    "pegar": {
+      "suggested_key": { "default": "Ctrl+Shift+V" },
+      "description": "Pegar datos en el formulario (dominio destino)"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["datosPrueba.json", "referencia.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
