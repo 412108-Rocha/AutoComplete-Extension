@@ -205,19 +205,19 @@ function vaciarClip() { sendToActiveTab('vaciar_portapapeles'); setTimeout(refre
 // Configuración
 async function cargarConfig() {
   const { settings } = await chrome.storage.sync.get(["settings"]);
-  const s = settings || { ttlSeconds: 900, notifications: true, commandsEnabled: true };
-  q('ttlInput').value = s.ttlSeconds;
+  const s = settings || { ttlSeconds: 45, notifications: true, commandsEnabled: true };
+  // TTL ya no es configurable por UI; queda en 45s por defecto
   q('notifsChk').checked = !!s.notifications;
-  // mover toggle de atajos a su pestaña
   const chk = q('cmdsChk');
   if (chk) chk.checked = !!s.commandsEnabled;
 }
 
 async function guardarConfig() {
-  const ttl = parseInt(q('ttlInput').value, 10);
+  // Guardar solo notificaciones; ttlSeconds no se configura por UI
   const notifications = q('notifsChk').checked;
-  if (!Number.isFinite(ttl) || ttl < 10) { alert('TTL inválido'); return; }
-  await chrome.storage.sync.set({ settings: { ...(await chrome.storage.sync.get(["settings"]).then(r=>r.settings||{})), ttlSeconds: ttl, notifications } });
+  const current = (await chrome.storage.sync.get(["settings"]))?.settings || {};
+  const next = { ...current, notifications };
+  await chrome.storage.sync.set({ settings: next });
   chrome.runtime.sendMessage({ type: 'notify', payload: { title: 'Configuración', message: 'Guardada', context: 'success' } });
 }
 

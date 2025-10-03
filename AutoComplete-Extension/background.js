@@ -1,7 +1,7 @@
 // background.js - MV3 service worker
 
 const DEFAULT_SETTINGS = {
-  ttlSeconds: 900,
+  ttlSeconds: 45,
   notifications: true,
   commandsEnabled: true
 };

@@ -46,9 +46,14 @@ function obtenerSelectorUnico(el) {
     return path.join(" > ");
 }
 
+const DEFAULT_TTL_SECONDS = 45;
+
 async function getSettings() {
     const { settings } = await chrome.storage.sync.get(["settings"]);
-    return settings || { ttlSeconds: 900, notifications: true, commandsEnabled: true };
+    // Forzamos TTL por defecto en 45 si no existe o es inválido
+    const s = settings || { ttlSeconds: DEFAULT_TTL_SECONDS, notifications: true, commandsEnabled: true };
+    if (!Number.isFinite(s.ttlSeconds) || s.ttlSeconds <= 0) s.ttlSeconds = DEFAULT_TTL_SECONDS;
+    return s;
 }
 
 function notify(payload) {
@@ -205,8 +210,8 @@ async function copiarDatos() {
         datos[codigo] = val;
     });
 
-    const settings = await getSettings();
-    const clip = { data: datos, ts: nowMs(), ttlSeconds: settings.ttlSeconds };
+    // TTL fijo en 45s
+    const clip = { data: datos, ts: nowMs(), ttlSeconds: DEFAULT_TTL_SECONDS };
     await setClipboard(clip);
 
     const okCount = codigos.length - faltantes.length;
